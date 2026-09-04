@@ -43,7 +43,7 @@ interface Props {
 }
 
 export default class Swipable extends React.Component<Props> {
-  private dragContainer: React.RefObject<HTMLDivElement>
+  private dragContainerElement: HTMLDivElement | null = null
   private dragStartPos: { x: number; y: number }
   private isDragging: boolean
   private isPointerDown: boolean
@@ -103,8 +103,6 @@ export default class Swipable extends React.Component<Props> {
   constructor(props: Props) {
     super(props)
 
-    this.dragContainer = React.createRef()
-
     this.stopAnimation = () => {}
     this.isPointerDown = false
     this.isDragging = false
@@ -128,6 +126,8 @@ export default class Swipable extends React.Component<Props> {
   }
 
   public componentDidMount() {
+    this.syncInertState()
+
     if (!window || !window.document) {
       return
     }
@@ -159,8 +159,30 @@ export default class Swipable extends React.Component<Props> {
     })
   }
 
-  /* Prevents click events from firing in the event of
-   * firing swipe events. */
+  private applyInertState = (element: HTMLDivElement) => {
+    if (this.props.enabled) {
+      element.removeAttribute('inert')
+    } else {
+      element.setAttribute('inert', '')
+    }
+
+    element.removeAttribute('aria-hidden')
+  }
+
+  private syncInertState = () => {
+    if (this.dragContainerElement) {
+      this.applyInertState(this.dragContainerElement)
+    }
+  }
+
+  private setDragContainerRef = (element: HTMLDivElement | null) => {
+    this.dragContainerElement = element
+
+    if (element) {
+      this.applyInertState(element)
+    }
+  }
+
   private handleClick = (event: Event) => {
     if (this.wasDragging || this.isPointerDown) {
       event.preventDefault()
@@ -171,6 +193,8 @@ export default class Swipable extends React.Component<Props> {
   }
 
   public componentDidUpdate(prevProps: Props) {
+    this.syncInertState()
+
     if (prevProps.enabled && !this.props.enabled && this.isPointerDown) {
       this.isPointerDown = false
     }
@@ -225,7 +249,7 @@ export default class Swipable extends React.Component<Props> {
 
     if (
       !this.props.allowOutsideDrag &&
-      !this.dragContainer.current?.contains(event.target as Node)
+      !this.dragContainerElement?.contains(event.target as Node)
     ) {
       return
     }
@@ -336,9 +360,9 @@ export default class Swipable extends React.Component<Props> {
   }
 
   private setOffset = (offset: number | string) => {
-    if (this.dragContainer?.current) {
+    if (this.dragContainerElement) {
       this.props.onSetPosition({
-        element: this.props.element || this.dragContainer.current,
+        element: this.props.element || this.dragContainerElement,
         offset,
       })
       this.props.onUpdateOffset(offset)
@@ -350,10 +374,10 @@ export default class Swipable extends React.Component<Props> {
   private setMomentum = (momentum: number, target: number | string) => {
     const [, targetUnit] = parseMeasure(target) ?? []
 
-    if (this.dragContainer.current == null) return
+    if (this.dragContainerElement == null) return
 
     if (targetUnit === '%') {
-      const bounds = this.dragContainer.current.getBoundingClientRect()
+      const bounds = this.dragContainerElement.getBoundingClientRect()
       const { width } = bounds
 
       this.offset = `${(Number(this.offset) / width) * 100}%`
@@ -484,8 +508,7 @@ export default class Swipable extends React.Component<Props> {
   public render() {
     return (
       <div
-        aria-hidden={this.props.enabled ? 'false' : 'true'}
-        ref={this.dragContainer}
+        ref={this.setDragContainerRef}
         style={{
           ...this.props.style,
           transform: `translate3d(${this.getOffsetFromPosition()}, 0, 0)`,
