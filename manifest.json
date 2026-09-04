@@ -1,7 +1,7 @@
 {
-  "name": "store-drawer",
-  "vendor": "vtex",
-  "version": "0.18.3",
+  "vendor": "acctglobal",
+  "name": "poc-traction-drawer",
+  "version": "0.0.1",
   "title": "Store Drawer",
   "description": "The VTEX Drawer",
   "builders": {
@@ -16,7 +16,6 @@
     "vtex.responsive-values": "0.x",
     "vtex.pixel-manager": "1.x"
   },
-  "mustUpdateAt": "2020-03-28",
   "registries": [
     "smartcheckout"
   ],
