@@ -1,0 +1,4 @@
+{
+  "name": "Store Drawer",
+  "install": "{ [ -f package.json ] || cd repos/drawer; } && yarn install --frozen-lockfile && yarn --cwd react install --frozen-lockfile"
+}
