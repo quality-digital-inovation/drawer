@@ -80,4 +80,54 @@ describe('Swipable a11y', () => {
 
     expect(drawer.hasAttribute('inert')).toBe(false)
   })
+
+  it('removes stale aria-hidden on the drawer container', () => {
+    const { container, rerender } = render(
+      <Swipable {...defaultProps} enabled={false}>
+        <div>
+          <button type="button">Menu link</button>
+        </div>
+      </Swipable>
+    )
+
+    const drawer = container.firstChild as HTMLElement
+
+    drawer.setAttribute('aria-hidden', 'true')
+
+    rerender(
+      <Swipable {...defaultProps} enabled={false}>
+        <div>
+          <button type="button">Menu link</button>
+        </div>
+      </Swipable>
+    )
+
+    expect(drawer.getAttribute('aria-hidden')).toBeNull()
+    expect(drawer.hasAttribute('inert')).toBe(true)
+  })
+
+  it('sets inert when drawer closes after being open', () => {
+    const { container, rerender } = render(
+      <Swipable {...defaultProps} enabled={true}>
+        <div>
+          <a href="/category">Category</a>
+        </div>
+      </Swipable>
+    )
+
+    const drawer = container.firstChild as HTMLElement
+
+    expect(drawer.hasAttribute('inert')).toBe(false)
+
+    rerender(
+      <Swipable {...defaultProps} enabled={false}>
+        <div>
+          <a href="/category">Category</a>
+        </div>
+      </Swipable>
+    )
+
+    expect(drawer.hasAttribute('inert')).toBe(true)
+    expect(drawer.getAttribute('aria-hidden')).toBeNull()
+  })
 })

@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
-- **a11y (TA-85):** Replace `aria-hidden` with `inert` on closed drawer to fix `aria-hidden-focus` axe violation when lazy-rendered children contain focusable elements
+- **a11y (TA-85):** Replace `aria-hidden` with `inert` on closed drawer to fix `aria-hidden-focus` axe violation when lazy-rendered children contain focusable elements; apply inert synchronously via callback ref and strip stale `aria-hidden` on hydration
 
 ### Changed
 
