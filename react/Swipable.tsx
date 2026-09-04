@@ -128,6 +128,8 @@ export default class Swipable extends React.Component<Props> {
   }
 
   public componentDidMount() {
+    this.syncInertState()
+
     if (!window || !window.document) {
       return
     }
@@ -161,6 +163,20 @@ export default class Swipable extends React.Component<Props> {
 
   /* Prevents click events from firing in the event of
    * firing swipe events. */
+  private syncInertState = () => {
+    const element = this.dragContainer.current
+
+    if (!element) {
+      return
+    }
+
+    if (this.props.enabled) {
+      element.removeAttribute('inert')
+    } else {
+      element.setAttribute('inert', '')
+    }
+  }
+
   private handleClick = (event: Event) => {
     if (this.wasDragging || this.isPointerDown) {
       event.preventDefault()
@@ -171,6 +187,10 @@ export default class Swipable extends React.Component<Props> {
   }
 
   public componentDidUpdate(prevProps: Props) {
+    if (prevProps.enabled !== this.props.enabled) {
+      this.syncInertState()
+    }
+
     if (prevProps.enabled && !this.props.enabled && this.isPointerDown) {
       this.isPointerDown = false
     }
@@ -484,7 +504,6 @@ export default class Swipable extends React.Component<Props> {
   public render() {
     return (
       <div
-        aria-hidden={this.props.enabled ? 'false' : 'true'}
         ref={this.dragContainer}
         style={{
           ...this.props.style,
